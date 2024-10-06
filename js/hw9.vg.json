@@ -1,0 +1,90 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Global Unemployment Rate (2014-2024)",
+  "width": 800,
+  "height": 500,
+  "projection": {"type": "equalEarth"},
+  "params": [
+    {
+      "name": "year_param",
+      "value": 2024,
+      "bind": {
+        "input": "range",
+        "min": 2014,
+        "max": 2024,
+        "step": 1,
+        "name": "Select Year: "
+      }
+    }
+  ],
+  "layer": [
+    {
+      "data": {"graticule": true},
+      "mark": {
+        "type": "geoshape",
+        "stroke": "lightgray",
+        "strokeWidth": 0.5
+      }
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/FIT3179/Vega-Lite/main/2_symbol_map/js/ne_110m_admin_0_countries.topojson",
+        "format": {"type": "topojson", "feature": "ne_110m_admin_0_countries"}
+      },
+      "mark": {
+        "type": "geoshape",
+        "fill": "lightgray",
+        "stroke": "white"
+      }
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/dlee0091/wk9_FIT3179_homework/refs/heads/main/data/wrangled_global_unemployment_data.csv"
+      },
+      "transform": [
+        {
+          "lookup": "country_name",
+          "from": {
+            "data": {
+              "url": "https://raw.githubusercontent.com/FIT3179/Vega-Lite/main/2_symbol_map/js/ne_110m_admin_0_countries.topojson",
+              "format": {"type": "topojson", "feature": "ne_110m_admin_0_countries"}
+            },
+            "key": "properties.NAME",
+            "fields": ["geometry"]
+          },
+          "as": "geo"
+        },
+        {
+          "fold": ["2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"],
+          "as": ["year", "unemployment_rate"]
+        },
+        {
+          "filter": "datum.year == year_param"
+        }
+      ],
+      "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 0.5},
+      "encoding": {
+        "shape": {"field": "geo", "type": "geojson"},
+        "color": {
+          "field": "unemployment_rate",
+          "type": "quantitative",
+          "scale": {
+            "type": "log",
+            "domain": [1, 100],
+            "range": ["#cce5ff", "#99ccff", "#3399ff", "#0066cc", "#003366"]
+          },
+          "legend": {
+            "title": "Unemployment Rate (%)",
+            "orient": "right",
+            "offset": 10
+          }
+        },
+        "tooltip": [
+          {"field": "country_name", "type": "nominal", "title": "Country"},
+          {"field": "unemployment_rate", "type": "quantitative", "title": "Unemployment Rate (%)"},
+          {"field": "year", "type": "ordinal", "title": "Year"}
+        ]
+      }
+    }
+  ]
+}

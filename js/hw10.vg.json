@@ -1,0 +1,93 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 600,
+  "height": 300,
+  "title": "Top 5 Countries with Highest Unemployment Rates by Sex",
+  "data": {
+    "url": "https://raw.githubusercontent.com/dlee0091/wk9_FIT3179_homework/refs/heads/main/data/wrangled_global_unemployment_data.csv"
+  },
+  "params": [
+    {
+      "name": "Sex_selection",
+      "bind": {
+        "input": "select",
+        "options": ["Male", "Female"],
+        "name": "Select Sex: "
+      },
+      "value": "Female"
+    }
+  ],
+  "transform": [
+    {
+      "filter": "datum.sex == Sex_selection"
+    },
+    {
+      "filter": "datum['2024'] != null"
+    },
+    {
+      "calculate": "datum['2024'] / 100",
+      "as": "unemployment_rate"
+    },
+    {
+      "window": [{"op": "rank", "as": "rank"}],
+      "sort": [{"field": "unemployment_rate", "order": "descending"}]
+    },
+    {
+      "filter": "datum.rank <= 5"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "bar"
+      },
+      "encoding": {
+        "y": {
+          "field": "country_name",
+          "type": "nominal",
+          "axis": {
+            "title": "Country",
+            "labelFontSize": 12,
+            "labelLimit": 100,
+            "labelPadding": 10
+          }
+        },
+        "x": {
+          "field": "unemployment_rate",
+          "type": "quantitative",
+          "axis": {
+            "title": "Unemployment Rate (%)"
+          },
+          "scale": {
+            "domain": [0, 1]
+          }
+        },
+        "color": {
+          "field": "country_name",
+          "type": "nominal",
+          "legend": {"title": "Country"}
+        },
+        "tooltip": [
+          {"field": "country_name", "title": "Country:"},
+          {"field": "unemployment_rate", "title": "Unemployment Rate (%):", "format": ".2%"}
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 3, 
+        "dy": -2,
+        "color": "black",
+        "fontWeight": "bold"
+      },
+      "encoding": {
+        "y": {"field": "country_name", "type": "nominal"},
+        "x": {"field": "unemployment_rate", "type": "quantitative"},
+        "text": {"field": "unemployment_rate", "type": "quantitative", "format": ".2%"},
+        "tooltip": [{"field": "unemployment_rate", "title": "Unemployment Rate (%)"}]
+      }
+    }
+  ]
+}
